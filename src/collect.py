@@ -122,6 +122,8 @@ class Collect:
 
             filename_data = file_folder / f'{file.stem.lower()}.parquet'
             self.save_data(df, filename_data)
+            filename_meta = file_folder / 'metadata.parquet'
+            self.save_data(metadata, filename_meta)
             
             file.unlink()
 
