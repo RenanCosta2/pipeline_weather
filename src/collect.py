@@ -125,6 +125,7 @@ class Collect:
             filename_meta = file_folder / 'metadata.parquet'
             self.save_data(metadata, filename_meta)
             
+        for file in files:
             file.unlink()
 
     # Processamento do pipeline para os anos definidos no init
