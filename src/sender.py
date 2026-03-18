@@ -2,6 +2,7 @@ from google.cloud import storage
 import os
 from dotenv import load_dotenv
 from tqdm import tqdm 
+import shutil
 from pathlib import Path
 import argparse
 
@@ -29,7 +30,7 @@ class Sender:
         
             filename.unlink()
         except Exception as err:
-            print(err)
+            logging.error(f"Falha no envio do arquivo {filename}: {err}")
         
     # Processa o diretório de arquivos para realizar o upload dos arquivos desejados
     def process_folder(self, folder: Path, pattern: str, layer: str):
@@ -40,6 +41,9 @@ class Sender:
             gcs_path = Path(layer) / relative_path
 
             self.process_file(file, gcs_path)
+
+        if folder.exists():
+            shutil.rmtree(folder)
 
 
 if __name__ == "__main__":
@@ -58,9 +62,9 @@ if __name__ == "__main__":
     if args.layer in ["raw", "all"]:
         logging.info("Enviando dados raw")
         send.process_folder(folder / "raw", "*.zip", "raw")
+        logging.info("Envio de dados finalizado!")
 
     if args.layer in ["bronze", "all"]:
         logging.info("Enviando dados bronze")
         send.process_folder(folder / "bronze", "*.parquet", "bronze")
-
-    
+        logging.info("Envio de dados finalizado!")
