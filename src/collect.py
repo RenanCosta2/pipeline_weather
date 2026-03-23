@@ -26,9 +26,6 @@ class Collect:
         with requests.get(url, timeout=10, stream=True) as response:
             response.raise_for_status()
 
-            total = int(response.headers.get("content-length", 0))
-            downloaded = 0
-
             with open(zip_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
@@ -100,7 +97,6 @@ class Collect:
     # Processamento do pipeline completo
     def process(self, year):
         data_folder = BASE_DIR / "data"
-        data_folder.mkdir(parents=True, exist_ok=True)
 
         raw_folder = data_folder / "raw"
         raw_folder.mkdir(parents=True, exist_ok=True)
@@ -113,7 +109,7 @@ class Collect:
         logging.info("Extraindo arquivo zip")
         self.extract_zip(zip_path, extract_folder)
 
-        files = list(extract_folder.glob("*.[Cs][Ss][Vv]"))
+        files = list(extract_folder.rglob("*.[Cs][Ss][Vv]"))
 
         selected_files = self.get_latest_files(files)
         
@@ -124,12 +120,15 @@ class Collect:
             df, metadata = self.normalize_data(file)
 
             station_id = metadata["codigo (wmo)"].iloc[0]
-            file_folder = bronze_folder / f"year={year}" / f"station={station_id}"
-            file_folder.mkdir(parents=True, exist_ok=True)
 
-            filename_data = file_folder / f"{file.stem.lower()}.parquet"
+            filename_data_folder = bronze_folder / "data" / f"year={year}" / f"station={station_id}"
+            filename_data_folder.mkdir(parents=True, exist_ok=True)
+            filename_data = filename_data_folder / "data.parquet"
             self.save_data(df, filename_data)
-            filename_meta = file_folder / "metadata.parquet"
+
+            filename_meta_folder = bronze_folder / "metadata" / f"year={year}" / f"station={station_id}"
+            filename_meta_folder.mkdir(parents=True, exist_ok=True)
+            filename_meta = filename_meta_folder / "metadata.parquet"
             self.save_data(metadata, filename_meta)
             
         for file in files:
