@@ -104,6 +104,4 @@ Esse modelo permite:
 * Filtragem eficiente por partição
 * Redução de custo em consultas no downstream
 
-#### Integração com Camadas Analíticas
-
 Os dados armazenados na Bronze são posteriormente ingeridos no **BigQuery**, onde são utilizados como base para as transformações da camada **Silver**.
