@@ -41,7 +41,8 @@ class Collect:
             file,
             sep=";",
             encoding="latin1",
-            skiprows=8
+            skiprows=8,
+            dtype=str
         )
 
         metadata = pd.read_csv(
@@ -49,12 +50,40 @@ class Collect:
             sep=";",
             encoding="latin1",
             nrows=7,
-            header=None
+            header=None,
+            dtype=str
         )
         metadata = metadata.set_index(metadata.columns[0]).T
         metadata = metadata.rename(columns=lambda x: x.replace(":", "").lower())
 
         inmet_data["source_file"] = file.name
+
+        rename_columns = {
+            'Data': 'data',
+            'Hora UTC': 'hora_utc',
+            'PRECIPITAÇÃO TOTAL, HORÁRIO (mm)': 'precipitacao_total_mm',
+            'PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)': 'pressao_atmosferica_estacao_mb',
+            'PRESSÃO ATMOSFERICA MAX.NA HORA ANT. (AUT) (mB)': 'pressao_atmosferica_max_mb',
+            'PRESSÃO ATMOSFERICA MIN. NA HORA ANT. (AUT) (mB)': 'pressao_atmosferica_min_mb',
+            'RADIACAO GLOBAL (Kj/m²)': 'radiacao_global_kj_m2',
+            'TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)': 'temperatura_ar_c',
+            'TEMPERATURA DO PONTO DE ORVALHO (°C)': 'temperatura_orvalho_c',
+            'TEMPERATURA MÁXIMA NA HORA ANT. (AUT) (°C)': 'temperatura_max_c',
+            'TEMPERATURA MÍNIMA NA HORA ANT. (AUT) (°C)': 'temperatura_min_c',
+            'TEMPERATURA ORVALHO MAX. NA HORA ANT. (AUT) (°C)': 'temperatura_orvalho_max_c',
+            'TEMPERATURA ORVALHO MIN. NA HORA ANT. (AUT) (°C)': 'temperatura_orvalho_min_c',
+            'UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)': 'umidade_relativa_max',
+            'UMIDADE REL. MIN. NA HORA ANT. (AUT) (%)': 'umidade_relativa_min',
+            'UMIDADE RELATIVA DO AR, HORARIA (%)': 'umidade_relativa',
+            'VENTO, DIREÇÃO HORARIA (gr) (° (gr))': 'vento_direcao_gr',
+            'VENTO, RAJADA MAXIMA (m/s)': 'vento_rajada_max_ms',
+            'VENTO, VELOCIDADE HORARIA (m/s)': 'vento_velocidade_ms',
+            'source_file': 'source_file'
+        }
+
+        inmet_data = inmet_data.drop(columns=['Unnamed: 19'], errors='ignore')
+
+        inmet_data = inmet_data.rename(columns=rename_columns)
 
         return inmet_data, metadata
     
