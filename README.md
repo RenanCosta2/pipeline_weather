@@ -6,7 +6,8 @@ O objetivo é coletar e processar dados climáticos históricos brutos e estrutu
 
 ## Etapas do Projeto
 - [Arquitetura](#arquitetura)
-- [Coleta](#coleta)
+- [Coleta de Dados](#coleta-de-dados)
+- [Camada Bronze](#camada-bronze)
 
 ### Arquitetura
 
@@ -19,7 +20,6 @@ Os dados finais são disponibilizados para consumo em ferramentas de BI, permiti
 ![alt text](img/arquitetura.png)
 
 ### Coleta de Dados
-
 
 A fonte de dados deste projeto é o [Banco de Dados Meteorológicos do INMET](https://bdmep.inmet.gov.br), disponível publicamente por meio do portal oficial. 
 
@@ -39,4 +39,57 @@ Exemplo de endpoint:
 https://portal.inmet.gov.br/uploads/dadoshistoricos/{ano}.zip
 ```
 
-Esse arquivo compactado corresponde aos dados da camada `raw`, ou camada de dados brutos.
+Esse arquivo compactado corresponde aos dados da camada `raw`, ou camada de dados brutos, e foram armazenados em um bucket na plataforma do **Google Cloud Storage**.
+
+### Camada Bronze
+
+A camada **Bronze** é responsável por armazenar os dados em seu formato mais próximo possível da origem, garantindo **fidelidade, rastreabilidade e possibilidade de reprocessamento**.
+
+#### Estrutura dos Dados de Origem
+
+Os dados provenientes do INMET são disponibilizados em arquivos compactados (`.zip`) que, ao serem descompactados, resultam em múltiplos arquivos `.csv`, cada um correspondente a uma estação meteorológica.
+
+Cada arquivo apresenta uma estrutura não padronizada para consumo direto, composta por:
+
+* Linhas iniciais contendo **metadados da estação** (ex: região, UF, código WMO, localização)
+* Linhas subsequentes contendo as **medições meteorológicas ao longo do tempo**
+
+#### Estratégia de Processamento na Bronze
+
+Para viabilizar a leitura e o consumo dos dados em formato analítico, foi aplicada uma transformação mínima, mantendo o princípio de **dados quase brutos**:
+
+* Separação dos arquivos em dois conjuntos:
+
+  * **dados meteorológicos**
+  * **metadados das estações**
+* Padronização dos nomes das colunas (remoção de caracteres inválidos como `"."`)
+* Remoção de colunas vazias
+* Conversão dos arquivos para o formato **Parquet**
+
+Essa abordagem preserva o conteúdo original, ao mesmo tempo em que resolve limitações técnicas de leitura e compatibilidade com ferramentas analíticas.
+
+#### Armazenamento e Particionamento
+
+Os dados são armazenados no **Google Cloud Storage**, organizados em estrutura de particionamento no padrão Hive, permitindo **leitura eficiente e escalabilidade**:
+
+```
+data/
+    year={year}/
+        station={station}/
+metadata/
+    year={year}/
+        station={station}/    
+```
+
+* **year**: ano de referência dos dados
+* **station**: identificador da estação meteorológica
+
+Esse modelo permite:
+
+* Processamento incremental por período
+* Filtragem eficiente por partição
+* Redução de custo em consultas no downstream
+
+#### Integração com Camadas Analíticas
+
+Os dados armazenados na Bronze são posteriormente ingeridos no **BigQuery**, onde são utilizados como base para as transformações da camada **Silver**.
