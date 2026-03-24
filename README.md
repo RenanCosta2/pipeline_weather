@@ -21,15 +21,17 @@ Os dados finais são disponibilizados para consumo em ferramentas de BI, permiti
 
 ### Coleta de Dados
 
-A fonte de dados deste projeto é o [Banco de Dados Meteorológicos do INMET](https://bdmep.inmet.gov.br), disponível publicamente por meio do portal oficial. 
+A fonte de dados deste projeto é o [Banco de Dados Meteorológicos do INMET](https://bdmep.inmet.gov.br), disponível publicamente por meio do portal oficial.
 
 Os dados contemplam [séries históricas anuais](https://portal.inmet.gov.br/uploads/dadoshistoricos/) de estações meteorológicas distribuídas em todo o território brasileiro, abrangendo o período de 2000 até os dias atuais. Entre as principais variáveis disponíveis estão:
 
-- Pressão atmosférica
-- Radiação Global
-- Temperatura
-- Umidade relativa do ar
-- Velocidade e direção do vento
+* Pressão atmosférica
+* Radiação global
+* Temperatura
+* Umidade relativa do ar
+* Velocidade e direção do vento
+
+#### Estratégia de Ingestão
 
 A coleta dos dados é realizada por meio de requisições HTTP para endpoints anuais disponibilizados pelo INMET. Cada requisição retorna um arquivo compactado (`.zip`) contendo os dados de todas as estações meteorológicas para o respectivo ano.
 
@@ -39,7 +41,19 @@ Exemplo de endpoint:
 https://portal.inmet.gov.br/uploads/dadoshistoricos/{ano}.zip
 ```
 
-Esse arquivo compactado corresponde aos dados da camada `raw`, ou camada de dados brutos, e foram armazenados em um bucket na plataforma do **Google Cloud Storage**.
+A ingestão é orientada por **granularidade anual**, permitindo controle explícito sobre os períodos processados e facilitando reprocessamentos pontuais.
+
+#### Camada Raw
+
+Os arquivos `.zip` são armazenados **sem qualquer modificação** em um bucket no **Google Cloud Storage**, constituindo a camada **Raw** do pipeline.
+
+Essa camada tem como objetivo:
+
+* Preservar integralmente os dados de origem
+* Garantir rastreabilidade
+* Permitir reprocessamento completo do pipeline
+
+O pipeline foi projetado para ser **idempotente**, evitando duplicidade de dados em reexecuções.
 
 ### Camada Bronze
 
