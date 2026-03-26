@@ -49,7 +49,7 @@ class Collect:
             file,
             sep=";",
             encoding="latin1",
-            nrows=7,
+            nrows=8,
             header=None,
             dtype=str
         )
