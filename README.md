@@ -105,3 +105,33 @@ Esse modelo permite:
 * Redução de custo em consultas no downstream
 
 Os dados armazenados na Bronze são posteriormente ingeridos no **BigQuery**, onde são utilizados como base para as transformações da camada **Silver**.
+
+
+### Camada Silver
+
+A camada Silver é responsável por transformar os dados da Bronze em um formato **estruturado, consistente e confiável**, servindo como base para a construção da camada analítica.
+
+As seguintes etapas são aplicadas aos dados meteorológicos:
+
+* Seleção de colunas relevantes
+    * Remoção de variáveis desnecessárias para as análises.
+
+* Padronização de nomes de colunas
+    * Conversão dos nomes das colunas para um padrão `snake_case`.
+
+* Tipagem dos dados
+    * Conversão dos colunas para a sua tipagem adequada.
+
+* Padronização de datas
+    * Normalização de campos de data e hora, incluindo conversão de Timezone `UTC` → `BRT`.
+
+* Tratamento de valores nulos
+    * Remoção de registros no qual TODAS as métricas meteorológicas estavam vazias.
+
+* Remoção de duplicados
+    * Verificação de possíveis registros duplicados com base na data e estação, porém não foi encontrado nenhuma ocorrência.
+
+* Tratamento de valores inválidos
+    * Identificação e tratamento de valores inconsistentes (ex: temperaturas inválidas).
+
+Ao final dessa etapa, os dados passam a seguir um schema padronizado, permitindo uma **confiabilidade** nos dados para a execução das consultas analíticas.
