@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: stg_weather_metadata
+
+    columns:
+      - name: station
+        tests:
+          - not_null
+
+      - name: regiao
+        tests:
+          - not_null
+
+      - name: uf
+        tests:
+          - not_null
+        
+      - name: cidade
+        tests:
+          - not_null
+
+      - name: codigo_wmo
+        tests:
+          - not_null

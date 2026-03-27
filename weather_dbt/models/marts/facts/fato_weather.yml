@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: fato_weather
+
+    tests:
+      - unique:
+          column_name: "(data_id || '-' || hora_id || '-' || localizacao_id)"

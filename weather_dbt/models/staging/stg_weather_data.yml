@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: stg_weather_data
+
+    columns:
+      - name: datetime_utc
+        tests:
+          - not_null
+
+      - name: station
+        tests:
+          - not_null

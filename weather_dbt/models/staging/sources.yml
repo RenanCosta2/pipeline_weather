@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: weather_bronze
+    database: ornate-shine-402117
+    schema: weather_bronze
+    tables:
+      - name: bronze_weather_data
+      - name: bronze_weather_metadata
